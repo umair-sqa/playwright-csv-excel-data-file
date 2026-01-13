@@ -2,20 +2,11 @@ import { test, expect } from "@playwright/test";
 import fs from "fs";
 import path from "path";
 import { LoginPage } from "../resources/pages/login";
+// import { readCsv } from "../resources/utils/fileReader";
 
-type UserRow = {
-  Gender: string;
-  FirstName: string;
-  LastName: string;
-  Email: string;
-  Password: string;
-};
+const csvPath = path.resolve("resources/data/registeredUsers.csv");
 
-const csvPath = path.resolve("resources/data/csv/registeredUsers.csv");
-
-function readUsersFromCsv(filePath: string): UserRow[] {
-  if (!fs.existsSync(filePath)) return [];
-
+function readUsersFromCsv(filePath: string) {
   const [headerLine, ...rows] = fs
     .readFileSync(filePath, "utf8")
     .split(/\r?\n/)
@@ -30,15 +21,13 @@ function readUsersFromCsv(filePath: string): UserRow[] {
     const values = row.split(",");
     return Object.fromEntries(
       headers.map((h, i) => [h, (values[i] ?? "").trim()])
-    ) as UserRow;
+    );
   });
 }
 
 const users = readUsersFromCsv(csvPath);
 
 test.describe("Login (CSV) - POM", () => {
-  test.skip(users.length === 0, "No users found in registeredUsers.csv");
-
   users.forEach((user, index) => {
     test(`Login user ${index + 1} - ${user.Email}`, async ({ page }) => {
       const login = new LoginPage(page);
