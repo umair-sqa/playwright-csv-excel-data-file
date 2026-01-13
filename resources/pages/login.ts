@@ -43,11 +43,11 @@ export class LoginPage {
     ]);
   }
 
-  async getErrorText(): Promise<string> {
+  async getErrorText() {
     return this.messageError.innerText().catch(() => "");
   }
 
-  async isLoggedIn(): Promise<boolean> {
+  async isLoggedIn() {
     const logout = this.page.locator("a", { hasText: /log out|logout/i });
     return (await logout.count()) > 0;
   }

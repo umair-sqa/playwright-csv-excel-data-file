@@ -1,14 +1,20 @@
 import fs from "fs";
-import csv from "csv-parser";
-import path from "path";
 
-export const readCsv = async <T>(filePath: string): Promise<T[]> =>
-  new Promise((resolve, reject) => {
-    const rows: T[] = [];
+export function readUsersFromCsv(filePath: string) {
+  const [headerLine, ...rows] = fs
+    .readFileSync(filePath, "utf8")
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter(Boolean);
 
-    fs.createReadStream(path.resolve(filePath))
-      .pipe(csv())
-      .on("data", (data) => rows.push(data as T))
-      .on("end", () => resolve(rows))
-      .on("error", reject);
+  if (!headerLine) return [];
+
+  const headers = headerLine.split(",").map((h) => h.trim());
+
+  return rows.map((row) => {
+    const values = row.split(",");
+    return Object.fromEntries(
+      headers.map((h, i) => [h, (values[i] ?? "").trim()])
+    );
   });
+}
