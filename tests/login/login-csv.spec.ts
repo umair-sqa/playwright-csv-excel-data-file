@@ -7,7 +7,7 @@ const csvPath = path.resolve("resources/data/csv/registeredUsers.csv");
 
 const users = readUsersFromCsv(csvPath);
 
-test.describe.only("Login (CSV) - POM", () => {
+test.describe("Login (CSV) - POM", () => {
   users.forEach((user, index) => {
     test(`Login user ${index + 1} - ${user.Email}`, async ({ page }) => {
       const login = new LoginPage(page);
