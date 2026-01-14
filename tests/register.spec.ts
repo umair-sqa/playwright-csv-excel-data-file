@@ -3,7 +3,7 @@ import fs from "fs";
 import path from "path";
 import * as XLSX from "xlsx";
 import { faker } from "@faker-js/faker";
-import { RegisterPage } from "../pages/register";
+import { RegisterPage } from "../resources/pages/register";
 
 type User = {
   Gender: string;
