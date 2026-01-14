@@ -7,7 +7,7 @@ const excelPath = path.resolve("resources/data/excel/registeredUsers.xlsx");
 
 const users = readUsersFromExcel(excelPath);
 
-test.describe.only("Login (Excel) - POM", () => {
+test.describe("Login (Excel) - POM", () => {
   users.forEach((user, index) => {
     // @ts-ignore
     test(`Login user ${index + 1} - ${user.Email}`, async ({ page }) => {
