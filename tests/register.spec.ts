@@ -13,7 +13,7 @@ type User = {
   Password: string;
 };
 
-test.describe.skip("Registration Data-Driven Tests (POM)", () => {
+test.describe("Registration Data-Driven Tests (POM)", () => {
   test("Signup users and save to CSV & Excel", async ({ page }) => {
     const users: User[] = [];
 

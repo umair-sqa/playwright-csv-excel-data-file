@@ -9,8 +9,6 @@ export function readUsersFromCsv(filePath: string) {
     .map((l) => l.trim())
     .filter(Boolean);
 
-  if (!headerLine) return [];
-
   const headers = headerLine.split(",").map((h) => h.trim());
 
   return rows.map((row) => {
@@ -25,10 +23,6 @@ export function readUsersFromCsv(filePath: string) {
 export function readUsersFromExcel(filePath, sheetName = "RegisteredUsers") {
   const workbook = XLSX.readFile(path.resolve(filePath));
   const sheet = workbook.Sheets[sheetName];
-
-  if (!sheet) {
-    throw new Error(`Sheet "${sheetName}" not found in Excel file`);
-  }
 
   return XLSX.utils.sheet_to_json(sheet, {
     defval: "",
