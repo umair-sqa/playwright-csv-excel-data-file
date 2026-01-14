@@ -1,4 +1,6 @@
 import fs from "fs";
+import * as XLSX from "xlsx";
+import path from "path";
 
 export function readUsersFromCsv(filePath: string) {
   const [headerLine, ...rows] = fs
@@ -16,5 +18,20 @@ export function readUsersFromCsv(filePath: string) {
     return Object.fromEntries(
       headers.map((h, i) => [h, (values[i] ?? "").trim()])
     );
+  });
+}
+
+// @ts-ignore
+export function readUsersFromExcel(filePath, sheetName = "RegisteredUsers") {
+  const workbook = XLSX.readFile(path.resolve(filePath));
+  const sheet = workbook.Sheets[sheetName];
+
+  if (!sheet) {
+    throw new Error(`Sheet "${sheetName}" not found in Excel file`);
+  }
+
+  return XLSX.utils.sheet_to_json(sheet, {
+    defval: "",
+    raw: false,
   });
 }

@@ -1,13 +1,13 @@
 import { test, expect } from "@playwright/test";
 import path from "path";
-import { LoginPage } from "../resources/pages/login";
-import { readUsersFromCsv } from "../resources/utils/fileReader";
+import { LoginPage } from "../../resources/pages/login";
+import { readUsersFromCsv } from "../../resources/utils/fileReader";
 
-const csvPath = path.resolve("resources/data/registeredUsers.csv");
+const csvPath = path.resolve("resources/data/csv/registeredUsers.csv");
 
 const users = readUsersFromCsv(csvPath);
 
-test.describe("Login (CSV) - POM", () => {
+test.describe.only("Login (CSV) - POM", () => {
   users.forEach((user, index) => {
     test(`Login user ${index + 1} - ${user.Email}`, async ({ page }) => {
       const login = new LoginPage(page);

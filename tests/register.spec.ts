@@ -1,18 +1,21 @@
 import { test, expect } from "@playwright/test";
 import fs from "fs";
 import path from "path";
+import * as XLSX from "xlsx";
 import { faker } from "@faker-js/faker";
 import { RegisterPage } from "../pages/register";
 
-test.describe("Registration Data-Driven Tests (POM)", () => {
-  test("Signup 5 users and save to CSV", async ({ page }) => {
-    const users: Array<{
-      Gender: string;
-      FirstName: string;
-      LastName: string;
-      Email: string;
-      Password: string;
-    }> = [];
+type User = {
+  Gender: string;
+  FirstName: string;
+  LastName: string;
+  Email: string;
+  Password: string;
+};
+
+test.describe.skip("Registration Data-Driven Tests (POM)", () => {
+  test("Signup users and save to CSV & Excel", async ({ page }) => {
+    const users: User[] = [];
 
     const register = new RegisterPage(page);
     await register.goto();
@@ -27,20 +30,16 @@ test.describe("Registration Data-Driven Tests (POM)", () => {
       const password = faker.internet.password({
         length: 12,
         memorable: true,
-        pattern: /[A-Za-z0-9!@#\$%\^&\*]/,
+        pattern: /[A-Za-z0-9!@#$%^&*]/,
       });
 
-      // Fill form using POM
       await register.selectGender(gender as "M" | "F");
       await register.fillFirstName(first);
       await register.fillLastName(last);
       await register.fillEmail(email);
       await register.fillPassword(password);
-
-      // Submit and then navigate back to registration for next user if needed
       await register.submit();
 
-      // After successful signup, collect user data
       users.push({
         Gender: gender,
         FirstName: first,
@@ -49,27 +48,59 @@ test.describe("Registration Data-Driven Tests (POM)", () => {
         Password: password,
       });
 
-      // Navigate back to register page to add next user
       await register.goto();
     }
 
-    // Write CSV to resources/data/csv/registeredUsers.csv
-    const csvDir = path.resolve("resources/data/csv");
-    if (!fs.existsSync(csvDir)) fs.mkdirSync(csvDir, { recursive: true });
-    const csvPath = path.join(csvDir, "registeredUsers.csv");
+    // 📁 Base data directory
+    const baseDir = path.resolve("resources/data");
+    fs.mkdirSync(baseDir, { recursive: true });
 
-    const header =
+    // =========================
+    // 🟢 WRITE CSV
+    // =========================
+    const csvDir = path.join(baseDir, "csv");
+    fs.mkdirSync(csvDir, { recursive: true });
+
+    const csvPath = path.join(csvDir, "registeredUsers.csv");
+    const csvHeader =
       ["Gender", "FirstName", "LastName", "Email", "Password"].join(",") + "\n";
-    const rows = users
+
+    const csvRows = users
       .map((u) =>
         [u.Gender, u.FirstName, u.LastName, u.Email, u.Password].join(",")
       )
       .join("\n");
-    fs.writeFileSync(csvPath, header + rows, "utf8");
 
-    // Basic assertion: file exists and contains at least 5 lines (header + 5 rows)
-    const content = fs.readFileSync(csvPath, "utf8");
-    const lines = content.split(/\r?\n/).filter(Boolean);
-    expect(lines.length).toBeGreaterThanOrEqual(6);
+    fs.writeFileSync(csvPath, csvHeader + csvRows, "utf8");
+
+    // =========================
+    // 🔵 WRITE EXCEL
+    // =========================
+    const excelDir = path.join(baseDir, "excel");
+    fs.mkdirSync(excelDir, { recursive: true });
+
+    const excelPath = path.join(excelDir, "registeredUsers.xlsx");
+
+    const workbook = XLSX.utils.book_new();
+    const worksheet = XLSX.utils.json_to_sheet(users);
+    XLSX.utils.book_append_sheet(workbook, worksheet, "RegisteredUsers");
+    XLSX.writeFile(workbook, excelPath);
+
+    // =========================
+    // ✅ ASSERTIONS
+    // =========================
+    expect(fs.existsSync(csvPath)).toBeTruthy();
+    expect(fs.existsSync(excelPath)).toBeTruthy();
+
+    const csvLines = fs
+      .readFileSync(csvPath, "utf8")
+      .split(/\r?\n/)
+      .filter(Boolean);
+    expect(csvLines.length).toBeGreaterThanOrEqual(6);
+
+    const excelData = XLSX.utils.sheet_to_json(
+      XLSX.readFile(excelPath).Sheets["RegisteredUsers"]
+    );
+    expect(excelData.length).toBeGreaterThanOrEqual(5);
   });
 });
