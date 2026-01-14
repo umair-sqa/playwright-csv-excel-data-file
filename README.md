@@ -29,7 +29,7 @@ npx playwright install
 
 ### Data Generation
 
-Create Users and store them in CSV and Excel file under data in resources
+Create users and store them in CSV and Excel files under `resources/data`:
 
 ```bash
 npm run user-generation
@@ -37,19 +37,31 @@ npm run user-generation
 
 ### Run tests
 
-- Run all Playwright tests:
+- Run CSV-related tests (uses the project's npm script which greps test titles containing `(CSV)`):
 
 ```bash
-npm test
+npm run test-csv
 ```
 
-- Or run Playwright directly (example):
+- Run Excel-related tests (greps test titles containing `(Excel)`):
+
+```bash
+npm run test-excel
+```
+
+- Run registration/user-generation tests (greps `Registration`):
+
+```bash
+npm run user-generation
+```
+
+- Run all Playwright tests directly (no npm script):
 
 ```bash
 npx playwright test
 ```
 
-Run a single test file:
+- Run a single test file:
 
 ```bash
 npx playwright test tests/register.spec.ts
